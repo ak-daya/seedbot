@@ -1,35 +1,24 @@
 #include <Servo.h>
 #include <Wire.h>
 
+int posX = 0;
+int posY = 0;
+int posZ = 0;
 
-const int forceClaw = 0;
-const int forceMoisture;
-const int clawPin = 11;
-const int seedPin = 22;
-const int diggerPin = 10;
-const int moisturePin = 24;
-const int leftEncA = 8;
-const int leftEncB = 7;
-const int rightEncA = 6;
-const int rightEncB = 5;
-const int valvePin = 12;
-//const int infraPin = 0;
+const byte forceClaw = 0;
+const byte forceMoisture;
+const byte clawPin = 11;
+const byte seedPin = 22;
+const byte diggerPin = 10;
+const byte moisturePin = 24;
+const byte leftEncA = 8;
+const byte leftEncB = 7;
+const byte rightEncA = 6;
+const byte rightEncB = 5;
+const byte valvePin = 12;
+//const byte infraPin = 0;
 
-// desired force
-int r = 500;
 
-// prop controller Kp
-float Kp = 0.5;
-
-//init global vars
-//reading from the forcesensor
-int y = 0;
-
-//error
-int e = 0;
-
-//output angle to servo
-float u_angle = 0;
 
 Servo myServo;
   /*~~~CREATE OBJS~~~*/
@@ -74,7 +63,7 @@ float bound(float x, float x_min, float x_max){
 }
 
 /*=====CLASS DEFINITIONS=====*/
-/*
+
 class Sweeper     //for claw and for seed dispenser
 {
   Servo servo;
@@ -82,26 +71,45 @@ class Sweeper     //for claw and for seed dispenser
   
   public:
     Sweeper(int servoPin){
-		servo.attach(servoPin);
-	}
+		  servo.attach(servoPin);
+	  }
 
     void Detach()
     {
       servo.detach();
     }
 
-    void SweepOut()
+    void Sweep(int fromAngle, int toAngle)
     {
-      for(angle = 0; angle < 65; angle++){ 
-        servo.write(angle);
+      if(fromAngle < toAngle){
+        for(i = fromAngle; i < toAngle; i++){ 
+          servo.write(i);
+        }
       }
-    }
+      else if(fromAngle > toAngle){
+        for(i = fromAngle; i > toAngle; i--){
+          servo.write(i);
+        }
+      }
+};
 
-    void SweepIn()
-    {
-      for(angle = 65; angle > 0; angle--){
-        servo.write(angle);
-      }
+class Valve
+{
+  int valvePin;
+
+  public:
+    Valve(int pin){
+      valvePin = pin;
+    }
+    
+    void openValve(){
+      //actuation signal;
+      digitalWrite(valvePin, HIGH);
+    }
+  
+    void closeValve(){
+      //stop signal;
+      digitalWrite(valvePin, LOW);
     }
 };
 
@@ -126,7 +134,22 @@ class Wheel
       return rpm;
     }
   
-    void moveForward(int pwmSpeed){
+    void moveForward(//x,y pos){
+      // desired rpm
+      int r = 500;
+      
+      // prop controller Kp
+      float Kp = 0.5;
+      
+      //init global vars
+      //rpm reading from the encoder
+      int y = 0;
+      
+      //error
+      int e = 0;
+      
+      //output pwm to motor
+      float u_pwm = 0;
       //write pwm speed to motor
       //12*298 = 3576
     }
@@ -142,30 +165,31 @@ class Wheel
     void turnLeft(){
       //
     }
+
+    void go2next(){
+      //go from row n to n+1
+    }
 };
 
-class Extender
+class Extender      //call sweep fn within
 {
   Servo servo;
   int angle = 0;
 
   public:
-    Extender(int servoPin, int forcePin){
-		pinMode(forcePin, INPUT);
-		servo.attach(servoPin);
+    Extender(int servoPin){
+		  servo.attach(servoPin);
     }
     
     void Detach(){
       servo.detach();
     }
     
-	int checkSensor(int forcePin){
-      int force = analogRead(forcePin);
-      return force;
-    }    
     void actuate(int angle){
-      while(checkSensor() < 500){
+      int threshold1, threshold2, threshold3;
+      while(analogRead(forcePin) < threshold1){
         servo.write(angle);
+        break;
       }
       //write angle to servo;
     }
@@ -174,22 +198,3 @@ class Extender
       //stop servo
     }
 };
-
-class Valve
-{
-  int valvePin;
-
-  public:
-    Valve(int pin){
-      valvePin = pin;
-    }
-    
-    void openValve(){
-      //actuation signal;
-    }
-  
-    void closeValve(){
-      //stop signal;
-    }
-};
-*/
